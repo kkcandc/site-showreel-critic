@@ -44,3 +44,5 @@ The art-directed lock is the pass that clears every mark. The exported film uses
 ## Deploy
 
 Static Vite build. `public/arcade-lab-reel.mp4`, `public/score.wav`, `public/poster.png`, and `public/contact-sheet.png` are generated locally and shipped with the site so the preview does not need Chrome. Vercel config is `vercel.json`.
+
+Preview: https://site-showreel-critic.vercel.app
