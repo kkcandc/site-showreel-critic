@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Arcade Lab — a twenty-second motion-graphics showreel scored on a contact sheet until every mark clears 8."
+    />
+    <meta name="theme-color" content="#12090e" />
+    <title>Arcade Lab — Showreel + Critic</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      if (new URLSearchParams(location.search).has('stage')) {
+        document.documentElement.classList.add('is-stage');
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

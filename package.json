@@ -1,0 +1,31 @@
+{
+  "name": "site-showreel-critic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "critic": "tsx scripts/critic-check.ts",
+    "audio": "tsx scripts/render-audio.ts",
+    "export": "node scripts/export.mjs"
+  },
+  "dependencies": {
+    "@fontsource/oxanium": "^5.2.8",
+    "@fontsource/sora": "^5.2.8",
+    "@remotion/player": "^4.0.379",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "^4.0.379"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "playwright": "^1.55.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.5"
+  }
+}
