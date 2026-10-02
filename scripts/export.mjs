@@ -112,6 +112,10 @@ async function main() {
         'out/beats/%02d.png',
         '-vf',
         'scale=216:270,tile=8x5',
+        '-frames:v',
+        '1',
+        '-update',
+        '1',
         'public/contact-sheet.png',
       ]);
       copyFileSync(`${frameDir}/0030.png`, 'public/poster.png');
