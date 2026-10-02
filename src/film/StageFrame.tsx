@@ -2,7 +2,7 @@ import { memo, useLayoutEffect, useRef } from 'react';
 import type { Recipe } from '../critic/loop';
 import { GAMES, PROOF, STUDIO } from '../content';
 import { ink, mix } from '../palette';
-import { BEAT, SCENES, beatIndex, slam, timecode } from '../timing';
+import { BEAT, SCENES, beatIndex, timecode } from '../timing';
 import { drawPlayfield } from './playfield';
 
 type Tones = {
@@ -23,8 +23,11 @@ function tonesFor(recipe: Recipe): Tones {
   };
 }
 
-function travel(local: number, distance: number, motion: number, duration = 0.16) {
-  return (1 - slam(local, duration)) * distance * (0.22 + motion);
+function overshoot(local: number, distance: number, motion: number) {
+  if (local <= 0) return 0;
+  const t = local / 0.14;
+  if (t >= 1) return 0;
+  return Math.sin(t * Math.PI) * distance * 0.16 * (0.35 + motion);
 }
 
 function PlayCanvas({
@@ -65,10 +68,9 @@ function activeScene(t: number, cutOffset: number) {
 function HookScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Tones }) {
   const { local } = activeScene(t, recipe.cutOffset);
   const size = 148 * recipe.headlineScale;
-  const shift = travel(local, 520, recipe.motion, 0.07 + (1 - recipe.hookPunch) * 0.34);
-  const fall = slam(Math.max(0, local - 0.08), 0.22 + (1 - recipe.hookPunch) * 0.25);
-  const landed = local > 0.42 && local < 0.56;
-  const impact = Math.exp(-local * (8 + recipe.hookPunch * 16)) * recipe.hookPunch;
+  const shift = overshoot(local, 220, recipe.motion * recipe.hookPunch);
+  const bounce = overshoot(Math.max(0, local - 0.5), 70, recipe.hookPunch);
+  const impact = Math.exp(-local * (10 + recipe.hookPunch * 14)) * recipe.hookPunch;
   return (
     <>
       <div
@@ -114,9 +116,9 @@ function HookScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Ton
         style={{
           position: 'absolute',
           left: 588,
-          top: 150 + (1 - fall) * -280 + fall * 430,
+          top: 548 - bounce,
           width: 86,
-          height: landed ? 64 : 86,
+          height: bounce > 20 ? 70 : 86,
           borderRadius: '50%',
           background: tones.gold,
           border: `6px solid ${ink.void}`,
@@ -158,7 +160,7 @@ function HookScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Ton
 
 function CabinetScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Tones }) {
   const { local } = activeScene(t, recipe.cutOffset);
-  const reveal = slam(local, 0.45 + (1 - recipe.motion) * 0.4);
+  const nudge = overshoot(local, 36, recipe.motion);
   const svgW = 500;
   const svgH = Math.round(svgW * (1100 / 640));
   const scale = svgW / 640;
@@ -181,7 +183,7 @@ function CabinetScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: 
             fontSize: 86 * recipe.headlineScale,
             lineHeight: 0.82,
             color: tones.paper,
-            transform: `translateX(${-travel(local, 180, recipe.motion)}px)`,
+            transform: `translateX(${-nudge}px)`,
           }}
         >
           Lights
@@ -199,7 +201,7 @@ function CabinetScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: 
           top: 120,
           width: svgW,
           height: svgH,
-          clipPath: `inset(0 ${(1 - reveal) * 100}% 0 0)`,
+          transform: `translateX(${nudge}px)`,
         }}
       >
         <svg viewBox="0 0 640 1100" width={svgW} height={svgH}>
@@ -274,7 +276,7 @@ function PlayScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Ton
   const { local } = activeScene(t, recipe.cutOffset);
   const score = String(Math.min(999999, Math.floor(local * 920 + 1200))).padStart(6, '0');
   const into = (t / BEAT) % 1;
-  const pop = into < 0.18 ? slam(into, 0.18) : 1;
+  const pop = into < 0.16 ? Math.sin((into / 0.16) * Math.PI) : 0;
   const showCombo = beatIndex(t) % 4 === 2;
   return (
     <>
@@ -300,7 +302,7 @@ function PlayScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Ton
             color: ink.void,
             background: tones.hot,
             padding: '8px 18px 4px',
-            transform: `scale(${0.86 + pop * 0.14}) translateX(${(1 - pop) * 80}px)`,
+            transform: `scale(${1 + pop * 0.08})`,
           }}
         >
           Combo x4
@@ -325,7 +327,7 @@ function ProofScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: To
         }}
       />
       {PROOF.map((item, index) => {
-        const p = slam(local - index * BEAT, 0.14);
+        const p = local + 1e-6 >= index * BEAT ? 1 : 0;
         return (
           <div
             key={item.label}
@@ -363,7 +365,7 @@ function EndScene({ t, recipe, tones }: { t: number; recipe: Recipe; tones: Tone
   const urlOn = t + 1e-6 >= recipe.urlStart;
   const size = 92 * recipe.headlineScale;
   const down = Math.floor(t / BEAT) % 2 === 0;
-  const shift = travel(local, 280, recipe.motion, 0.12);
+  const shift = overshoot(local, 160, recipe.motion);
   const urlImpact = urlOn ? Math.exp(-(t - recipe.urlStart) * 12) * recipe.hookPunch : 0;
   return (
     <>
